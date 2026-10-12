@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+<title>The Body Tell — Launch Command Center</title>
+<style>
+  :root{--paper:#F2ECE0;--card:#FBF7EF;--card-2:#EDE5D6;--ink:#241F1A;--ink-soft:#574E44;--muted:#8A7F70;--line:#E0D6C4;--line-2:#E8DECD;--gold:#C48820;--gold-deep:#9B6A14;--forest:#1F3A2C;--terra:#B7593E;--good:#2F5D43;--serif:Georgia,'Iowan Old Style',Palatino,'Times New Roman',serif;--sans:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;}
+  @media (prefers-color-scheme:dark){:root{--paper:#191410;--card:#221C15;--card-2:#2A2219;--ink:#EEE7D9;--ink-soft:#B7AD9C;--muted:#897E6D;--line:#342A1F;--line-2:#2D2419;--gold:#D99E3A;--gold-deep:#D99E3A;--forest:#2C5340;--terra:#D27A64;--good:#6FA383;}}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.01em}
+  h1{font-size:clamp(34px,5vw,64px);line-height:1.03;margin:14px 0}
+  h2{font-size:30px;margin:0 0 14px}
+  h3{font-size:21px;margin:0 0 9px}
+  p{margin:8px 0 14px;max-width:72ch}
+  .shell{max-width:1200px;margin:auto;padding:0 26px}
+  .top{background:var(--forest);color:#F2ECE0;padding:13px 0}
+  .top .shell{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{font-family:var(--mono);letter-spacing:.16em;font-size:12px;font-weight:700}
+  .brand span{color:#EBC978}
+  .top small{color:#CBB884;font-family:var(--mono);font-size:11px;letter-spacing:.08em}
+  .hero{padding:56px 0 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--mono);text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:700;color:var(--gold-deep)}
+  .lede{font-size:18px;max-width:820px;color:var(--ink-soft)}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .pill{border:1px solid var(--line);border-radius:100px;padding:6px 12px;font-size:12px;background:var(--card);font-family:var(--mono)}
+  .nav{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--paper) 92%,transparent);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+  .nav .shell{display:flex;gap:2px;overflow:auto}
+  .nav button{border:0;background:transparent;padding:15px 16px;white-space:nowrap;font-weight:600;color:var(--ink-soft);font-size:13px;cursor:pointer;font-family:var(--mono);text-transform:uppercase;letter-spacing:.03em}
+  .nav button.active{border-bottom:3px solid var(--gold);color:var(--ink)}
+  main{padding:36px 0 100px}
+  .section{display:none}.section.active{display:block}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  .metric,.panel,.post,.story{border:1px solid var(--line);background:var(--card);border-radius:12px}
+  .metric{padding:18px}.metric b{font-family:var(--serif);font-size:28px;display:block}.metric span{font-size:12px;color:var(--muted)}
+  .panel{padding:22px;margin:16px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr 1fr}.two,.three{grid-template-columns:1fr}}
+  @media(max-width:520px){.grid{grid-template-columns:1fr}}
+  .badge{display:inline-block;padding:4px 9px;border-radius:30px;background:var(--card-2);color:var(--gold-deep);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono)}
+  .dark{background:var(--forest);color:#F2ECE0}.dark p{color:#DCD2BE}.dark .badge{background:#2C5340;color:#F3C776}.dark strong{color:#F7E6C4}
+  .callout{border-left:4px solid var(--terra);padding:13px 17px;background:color-mix(in srgb,var(--terra) 10%,transparent);border-radius:0 8px 8px 0;margin:12px 0}
+  .weekcards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}
+  @media(max-width:820px){.weekcards{grid-template-columns:1fr 1fr}}
+  .weekcard{padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+  .weekcard .n{font-family:var(--serif);font-size:44px;color:var(--gold);line-height:1}
+  .weekcard p{color:var(--ink-soft);font-size:13px}
+  .btn{border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:7px;padding:9px 13px;font-weight:600;cursor:pointer;font-size:13px;font-family:var(--sans)}
+  .btn.secondary{background:transparent;color:var(--ink)}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#21170A}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .weekhead{margin:14px 0 22px}
+  .weekhead p{max-width:740px;color:var(--ink-soft)}
+  .post{overflow:hidden;margin-bottom:12px}
+  .posthead{padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer}
+  .day{width:72px;flex:none;font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:700;color:var(--gold-deep)}
+  .postname{flex:1}.postname h3{margin:0 0 2px;font-size:19px}.postname small{color:var(--muted);font-size:12px}
+  .expand{font-size:22px;color:var(--gold)}
+  .postbody{display:none;border-top:1px solid var(--line);padding:20px 22px 24px}
+  .post.open .postbody{display:block}
+  .label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:700;color:var(--gold-deep);margin:18px 0 6px}
+  .hook{font-family:var(--serif);font-size:22px;line-height:1.28;border-left:4px solid var(--gold);padding:9px 16px;background:var(--card-2);border-radius:0 8px 8px 0}
+  .script{white-space:pre-line;font-size:15.5px;line-height:1.8;max-width:860px;background:var(--card-2);border:1px solid var(--line);border-radius:9px;padding:20px}
+  .slides{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+  .slide{aspect-ratio:4/5;background:var(--card-2);border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;justify-content:space-between;white-space:pre-line;font-family:var(--serif);font-size:16px;line-height:1.3;border-radius:8px}
+  .slide b{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold-deep)}
+  .detail{background:var(--card-2);border-radius:8px;padding:12px 15px;margin-top:8px;font-size:14px;color:var(--ink-soft)}
+  .detail strong{color:var(--ink)}
+  .story{padding:15px;margin-bottom:8px}
+  .story strong{color:var(--gold-deep);font-family:var(--mono);font-size:12px;letter-spacing:.04em}
+  .story p{margin:5px 0 0;font-size:14px;color:var(--ink-soft)}
+  .story .cam{display:inline-block;font-family:var(--mono);font-size:10.5px;color:var(--terra);border:1px solid color-mix(in srgb,var(--terra) 40%,transparent);border-radius:20px;padding:1px 7px;margin-top:7px;letter-spacing:.03em}
+  .checklist label{display:block;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:14px}
+  .checklist input{accent-color:var(--gold);margin-right:10px}
+  .funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media(max-width:820px){.funnel{grid-template-columns:1fr 1fr}}
+  .step{background:var(--forest);color:#FFF8EC;padding:18px;border-radius:10px}
+  .step b{color:#F3C776;display:block;font-family:var(--serif);font-size:22px;margin-bottom:9px}
+  .step small{color:#D6C7B8}
+  .code{font-family:var(--mono);font-size:12px;background:var(--card-2);padding:11px;border-radius:7px;overflow-wrap:anywhere;color:var(--ink-soft)}
+  .muted{color:var(--muted)}
+  footer{border-top:1px solid var(--line);padding:24px 0 70px;color:var(--muted);font-size:12px}
+  @media print{.nav,.top,.actions,.btn{display:none!important}.section{display:block!important;page-break-before:always}.postbody{display:block!important}.post{break-inside:avoid}body{background:white}}
+</style>
+
+<header class="top"><div class="shell"><div class="brand">THE BODY TELL <span>/ COMMAND CENTER</span></div><small>MERGED EDITION · MOAT-FIRST · CLINICALLY GUARDED</small></div></header>
+
+<section class="hero"><div class="shell">
+  <div class="eyebrow">Audience → Founding Circle → free First Read → Pattern Report</div>
+  <h1>One launch.<br>Four weeks of momentum.</h1>
+  <p class="lede">A film-ready editorial and sales operating system. Each week tells you what to film, what to design, what to post in Stories, and where to capture consented email. Your conversational founder voice, the reviewer's clinical discipline, a light dry levity strand, in the real brand palette — coral retired.</p>
+  <div class="pills"><span class="pill">~8 feed assets / week</span><span class="pill">4 founder films (your voice)</span><span class="pill">28 daily Story cards</span><span class="pill">Founding Circle from Day 1</span><span class="pill">Month 2: fill from data</span></div>
+</div></section>
+
+<nav class="nav"><div class="shell" id="tabs"></div></nav>
+
+<main class="shell">
+  <section id="overview" class="section active">
+    <h2>The launch architecture</h2>
+    <div class="grid">
+      <div class="metric"><b>~32</b><span>feed assets / four weeks</span></div>
+      <div class="metric"><b>4</b><span>founder films to batch-film</span></div>
+      <div class="metric"><b>28</b><span>daily Story production cards</span></div>
+      <div class="metric"><b>1</b><span>consented email cohort from day one</span></div>
+    </div>
+    <div class="panel dark"><span class="badge">The correction that matters most</span>
+      <h2 style="margin-top:12px;color:#FBF7EF">Free ≠ the whole report.</h2>
+      <p>The <strong>First Read is free</strong> — it names your <strong>primary pattern</strong>. The full <strong>Pattern Report</strong> (all patterns, foundation flags, lab markers, the clinician brief) is the optional <strong>€35</strong> next step. Never say "free report." Say: <strong>"your free First Read,"</strong> then <strong>"the optional Pattern Report."</strong> And the Founding Circle email opt-in is <strong>separate</strong> from starting a reading — never gate the First Read behind a newsletter signup.</p>
+    </div>
+    <div class="weekcards" id="weekCards"></div>
+    <div class="two">
+      <div class="panel"><h3>Three commercial paths</h3>
+        <p><strong>Discovery post →</strong> follow / share / profile visit.</p>
+        <p><strong>Utility post →</strong> free appointment worksheet → email opt-in → Founding Circle welcome.</p>
+        <p><strong>Product proof →</strong> free First Read → optional Pattern Report. Cohort invite stays separate.</p>
+        <div class="callout"><strong>Do not gate the First Read behind newsletter consent.</strong> The cohort is valuable because women deliberately choose to join.</div>
+      </div>
+      <div class="panel"><h3>Week-by-week jobs</h3>
+        <p><strong>W1 · Recognition:</strong> fragmented signals become one coherent story.</p>
+        <p><strong>W2 · Understanding:</strong> what TBT does, and what it refuses to claim.</p>
+        <p><strong>W3 · Proof:</strong> concrete symptom relationships + the Default Body (skin-tone) method.</p>
+        <p><strong>W4 · Action:</strong> clinician language, report proof, free First Read.</p>
+        <p class="muted">Never promise a medical outcome, a diagnosis, or a conversion result.</p>
+      </div>
+    </div>
+    <div class="panel"><h3>First filming batch — the master checklist</h3><div class="checklist" id="mastercheck"></div></div>
+  </section>
+
+  <section id="cohort" class="section">
+    <h2>The Founding Circle — consented email from Day 1</h2>
+    <p class="lede">The conversion layer the first plan hand-waved. Women need a real reason to hand over an email before they're ready to read or buy — and the consent has to be clean.</p>
+    <div class="funnel">
+      <div class="step"><b>01 · Attract</b>Pattern reel, founder film, one clinical sentence, a shareable carousel.<small>Metric: non-follower reach + profile visits.</small></div>
+      <div class="step"><b>02 · Capture</b>Free <em>Bring the Whole Picture</em> appointment worksheet + Founding Circle opt-in.<small>Metric: confirmed email opt-ins.</small></div>
+      <div class="step"><b>03 · Nurture</b>Welcome, one worked pattern, founder story, product demo.<small>Metric: qualified First Read starts.</small></div>
+      <div class="step"><b>04 · Convert</b>Free First Read → optional paid Pattern Report.<small>Metric: completed readings + paid conversion.</small></div>
+    </div>
+    <div class="two">
+      <div class="panel"><h3>The lead magnet</h3><span class="badge">Build before launch</span>
+        <p><strong>Title:</strong> Bring the Whole Picture</p>
+        <p><strong>Promise:</strong> a one-page worksheet to organise what changed, when, what appears together, and what you want to ask.</p>
+        <p><strong>Format:</strong> printable PDF + mobile web version.</p>
+        <p><strong>Landing headline:</strong> "Your next appointment deserves the whole story."</p>
+        <p><strong>Button:</strong> "Send me the worksheet."</p>
+        <div class="callout"><strong>Only promote it once it exists</strong> and the delivery is tested.</div>
+      </div>
+      <div class="panel"><h3>Consent &amp; segmentation</h3>
+        <p>Fields: email; optional first name; optional interest ("understanding patterns" / "preparing for an appointment" / "skin tone &amp; health evidence").</p>
+        <p><strong>Separate marketing-consent checkbox, unticked by default.</strong> Privacy link, unsubscribe, and a plain description of what you'll send.</p>
+        <p><strong>Never collect symptom histories in email signup fields</strong> — health answers stay inside the protected product flow (GDPR Art. 9).</p>
+        <p><strong>Segment by source</strong> (founder / pattern / worksheet / demo) with UTMs.</p>
+      </div>
+    </div>
+    <div class="panel"><h3>Founding Circle welcome arc (5 emails)</h3>
+      <div class="three" id="emailArc"></div>
+    </div>
+    <div class="panel"><h3>Measurement</h3>
+      <div class="grid">
+        <div class="metric"><b>Opt-ins</b><span>unique consented emails / source</span></div>
+        <div class="metric"><b>CVR</b><span>landing visits → opt-ins</span></div>
+        <div class="metric"><b>Starts</b><span>First Read starts / UTM</span></div>
+        <div class="metric"><b>Paid</b><span>free readings → report purchases</span></div>
+      </div>
+      <p class="muted">Set targets after baseline traffic. Don't fabricate a "good" rate for an unmeasured funnel.</p>
+      <p class="code">utm_source=instagram&amp;utm_medium=organic&amp;utm_campaign=founding_circle_m1&amp;utm_content=w1_thu_timeline</p>
+      <div class="callout"><strong>Operational gate:</strong> verify double opt-in, worksheet delivery, product-to-email attribution, unsubscribe and consent logging <strong>before</strong> sending traffic.</div>
+    </div>
+  </section>
+
+  <section id="production" class="section">
+    <h2>Production control room</h2>
+    <p>Batch the founder films first, then pattern explainers, then screen recordings. Film all four weeks before the posting sprint if you can; leave room to react to audience language.</p>
+    <div class="two">
+      <div class="panel"><h3>Camera day A · Founder</h3><p><strong>Film:</strong> the 4 Monday founder films (your conversational scripts).</p><p><strong>Wardrobe:</strong> one hero look; alternate jacket/earrings per chapter.</p><p><strong>Setup:</strong> eye-level lens, warm diffused key light, no mirror glare, mic test, 9:16, negative space for captions.</p><p><strong>Out:</strong> 4 full films + 4 teasers + 8 story cutdowns.</p></div>
+      <div class="panel"><h3>Camera day B · Education</h3><p><strong>Film:</strong> the short founder-led explainers in the week cards.</p><p><strong>Method:</strong> record two hook variants each; pause between beats; grab 3–5s silent reaction plates.</p><p><strong>Out:</strong> A-roll masters, clean audio, alternate hooks, thumbnail stills.</p></div>
+      <div class="panel"><h3>Capture day C · Product</h3><p><strong>Capture:</strong> First Read intake, primary result, optional Pattern Report, clinician brief.</p><p><strong>Safety:</strong> test data only; remove identifiers; <strong>only claim features that exist in the live build.</strong></p><p><strong>Out:</strong> 3 demo reels + 6 stories + screenshot library.</p></div>
+      <div class="panel"><h3>Design day D · Editorial</h3><p><strong>Design:</strong> 8 carousels, 4 founder covers, reel covers, source footers, the worksheet.</p><p><strong>Palette:</strong> bone #F2ECE0, gold #C48820, forest #1F3A2C, terracotta #B7593E (sparing). Real/authentic skin. <strong>No coral/blush, no generic medical stock, no fake testimonials.</strong></p><p><strong>Export:</strong> 1080×1350 carousel, 1080×1920 reel/story; title in safe area.</p></div>
+    </div>
+    <div class="panel"><h3>Release gates — clear before publishing</h3><div class="checklist" id="gates"></div></div>
+  </section>
+
+  <section id="month2" class="section">
+    <h2>Month 2 · lower cadence, stronger learning</h2>
+    <div class="grid">
+      <div class="metric"><b>3</b><span>reels / week</span></div>
+      <div class="metric"><b>1</b><span>carousel / week</span></div>
+      <div class="metric"><b>4–5</b><span>story days / week</span></div>
+      <div class="metric"><b>1</b><span>Founding Circle email / week</span></div>
+    </div>
+    <div class="panel"><h3>Don't pre-fill Month 2 with guesses</h3>
+      <p>Lock only four repeatable franchises now: <strong>Same symptom, different question</strong> · <strong>What to say next</strong> · <strong>The Default Body</strong> · <strong>Show the Report</strong>. Fill the rest from real first-month search terms, saves, shares, comments, email replies and First Read conversion.</p>
+      <p><strong>Decision rule:</strong> keep formats with qualified reach + measurable downstream action; cut formats that earn empty impressions.</p>
+      <p><strong>Founder:</strong> ~2 pieces/month, not a weekly obligation. <strong>Levity:</strong> one dry piece a week, max — enough to let the feed breathe. <strong>Sales:</strong> one product demo/week, not constant "start free."</p>
+    </div>
+  </section>
+
+  <div id="weeks"></div>
+</main>
+
+<footer><div class="shell">The Body Tell · internal working production plan · educational content only. Clinical claims and product features require final clinician + legal verification before publishing. Merged from your plan + the feedback review; coral retired per the design OS; nothing here diagnoses.</div></footer>
+
+<script>
+const DATA={
+posts:[
+/* ---------------- WEEK 1 ---------------- */
+{week:1,day:"MON",kind:"Founder film · 90–120s",title:"I lost the company. Then I lost myself.",goal:"Trust / origin",levity:false,
+hook:"I built a company to prove women's skin was never the problem — the industry was. And then I lost it. And right after that, my own body started falling apart, in ways five specialists couldn't explain.",
+script:"Okay so — I need to tell you something, and honestly, I'm kind of still processing it myself.\n\nI built a company to prove that women's skin was never the problem — the industry was. And then I lost it. And right after that, my own body just… started falling apart, in ways that five different specialists could not explain.\n\nSo — hi. I'm Noelly. For six years I was the co-founder and CEO of 4.5.6 Skin. We built, like, the world's first research lab for the physiology of deeper skin tones — phototypes four, five and six. And it all came from this one belief, you know? That the skin the whole industry treats as the default… is not actually the skin of most people on this planet.\n\nAnd we built it for real. A proper, accredited lab. Our own formulas. A community that genuinely loved the brand. Awards, press, investors who believed in us. I was so proud of that. Honestly, I still am.\n\nBut we fought two problems the whole time — visibility and funding. They're kind of the same problem wearing different clothes, right? And then, in our best year, our anchor investor just… walked. One decision, and it was gone.\n\nAnd I thought losing the company was the hardest part. I mean — it wasn't. I was the thing that was actually breaking. I just didn't know it yet.",
+visual:"Founder close-up, bone background; authentic 4.5.6 archival lab inserts only.",cta:"Comment: have you ever had several health changes at once? And join the Founding Circle in the bio.",shots:"A-roll seated medium + close crop; 2 archive inserts; 5 symptom text overlays; hold a beat on 'company closed'.",proof:"Founder biography + personal symptoms: confirm final wording against her own records."},
+
+{week:1,day:"TUE",kind:"Discovery reel · 30s",title:"One symptom isn't the story",goal:"Reach / shares",levity:false,
+hook:"Fatigue doesn't tell me enough. Fatigue next to heavy periods changes the question.",
+script:"Fatigue doesn't tell me enough.\n\nFatigue with heavy periods raises one set of questions.\n\nFatigue with feeling cold and constipation raises another.\n\nFatigue with repeated meal-related crashes raises another.\n\nSame symptom. Different context. Different conversation.\n\nA pattern doesn't tell you what you have. It helps you see what belongs in the same conversation — and that can change what you remember to tell your clinician.",
+visual:"Kinetic typographic split: FATIGUE branches into three clusters. Bone + gold.",cta:"Save this. Join the Founding Circle through the bio.",shots:"One vertical take + 3 cutaway hand gestures; editor animates branches.",proof:"Examples stay non-diagnostic; avoid implying unique causes."},
+
+{week:1,day:"WED",kind:"Teaching reel · 40s",title:"A pattern is not a diagnosis",goal:"Category / trust",levity:false,
+hook:"A cluster of symptoms does not prove a cause. It gives direction.",
+script:"A cluster of symptoms does not prove a cause. It gives direction.\n\nIf you're exhausted, your periods have become heavier and you're breathless on the stairs — an app cannot tell you what you have.\n\nBut it can help you notice those changes may be worth discussing together.\n\nThat's a pattern. Context, chronology, a better starting question.\n\nThe Body Tell isn't trying to replace the clinician at the end. It's trying to improve the information at the beginning.\n\nPattern is direction. Not diagnosis.",
+visual:"Founder direct camera; forest title cards with gold underline.",cta:"Follow for clinical translation. Founding Circle in bio.",shots:"One continuous take; punch in on 'direction, not diagnosis'.",proof:""},
+
+{week:1,day:"THU AM",kind:"Carousel · 8 slides",title:"Four symptoms. One timeline.",goal:"Saves / method",levity:false,
+hook:"What changes when you put four symptoms on one timeline?",script:"",
+slides:["FOUR SYMPTOMS. ONE TIMELINE. | A worked example — not a diagnosis.","JANUARY | 'My periods became much heavier.'","FEBRUARY | 'I was exhausted by lunchtime.'","MARCH | 'Stairs left me unusually breathless.'","APRIL | 'I noticed more hair shedding.'","SEPARATE | Four complaints. Four disconnected conversations.","TOGETHER | 'Could these be connected — and is iron status worth assessing?'","TAKE THIS SENTENCE | 'My bleeding got heavier, then fatigue and breathlessness followed. Could they be related?' → free worksheet in the Founding Circle."],
+visual:"Timeline notebook; bone background, dark text, terracotta dates.",cta:"Save the timeline. Comment TIMELINE for the free worksheet (only if DM automation is live).",shots:"",proof:"Breathlessness can be serious — add 'new/severe breathlessness needs timely medical assessment.'"},
+
+{week:1,day:"THU PM",kind:"Short reel · 25s",title:"Stop saying 'I'm just tired'",goal:"Shares / language",levity:false,
+hook:"'I'm just tired' may be true. It still leaves out the useful part.",
+script:"'I'm just tired' may be true. But it leaves out the useful part.\n\nSince when? Every day? Does rest help? Did something else change?\n\nCompare 'I'm tired' with 'For four months I've been exhausted by mid-afternoon, and it started around the same time my periods got heavier.'\n\nSame symptom. Much more useful information.\n\nYou don't need medical vocabulary. You need specifics.",
+visual:"A/B on-screen sentences.",cta:"Send to someone preparing for an appointment.",shots:"One standing take; over-the-shoulder notebook B-roll.",proof:""},
+
+{week:1,day:"FRI",kind:"Product demo reel · 45s",title:"What The Body Tell actually does",goal:"Product / First Read",levity:false,
+hook:"Let me show you what a pattern reading actually looks like.",
+script:"Let me show you what I mean by a pattern reading.\n\nYou answer one guided set of questions across signals that usually get separated — cycle, sleep, energy, skin, mood and context.\n\nYour free First Read looks at those answers together and names a primary pattern. Not a disease diagnosis — a way to organise the strongest theme in what you reported.\n\nThe full Pattern Report is the optional next step: more context, and a clinician-facing brief.\n\nThe goal isn't to replace the appointment. It's to make your starting information easier to review.\n\nYour First Read is free — start from the link in the bio.",
+visual:"Real product screen recording only; magnify actual labels.",cta:"Start the free First Read. Opt in to the Founding Circle separately.",shots:"Record intake, result, report, brief; mask private data; VO recorded separately.",proof:"Check exact feature labels; confirm signup consent is separate from product consent."},
+
+{week:1,day:"SAT",kind:"Levity reel · 25s",title:"Five different patients by Thursday",goal:"Reach / relatability",levity:true,
+hook:"Here's my week as five different patients.",
+script:"Here's my week as five different patients.\n\nMonday: gynaecologist, for the cycle. Tuesday: endocrinologist, for the weight and the hormones. Wednesday: dermatologist, for the skin on the soles of my feet. That was a real appointment.\n\nThursday: GP, for the exhaustion. Friday I booked a therapist — not for the anxiety, for the logistics of being four different patients by Thursday.\n\nOne woman. One body. All of it at the same time. Nobody was looking at all of it together.\n\nThat's the reason The Body Tell exists.",
+visual:"Founder, dry delivery; small calendar overlay Mon–Fri. No music, flat affect.",cta:"If your calendar looks like this, you're not disorganised — the system is. Free First Read in bio.",shots:"One take, deadpan; hold on 'that was a real appointment'.",proof:"Keep it about the system's absurdity — never mock patients or doctors."},
+
+{week:1,day:"SUN",kind:"Carousel · 7 slides",title:"Your appointment, better prepared",goal:"Saves / lead magnet",levity:false,
+hook:"You have limited time. Don't spend it trying to remember the timeline.",script:"",
+slides:["YOU HAVE LIMITED TIME. | Bring the story in order.","1 · WHAT CHANGED? | 'Over the last six months, three things changed…'","2 · WHAT APPEARED TOGETHER? | Keep connected changes in one sentence.","3 · WHEN? | Approx month, frequency, cycle timing.","4 · IMPACT | What can't you do now that you could before?","5 · YOUR QUESTION | 'Given these changes, what should we investigate or monitor?'","SAVE THIS | Get the free appointment worksheet via the Founding Circle."],
+visual:"Editorial note cards; serif headlines + clean sans body; bone + gold.",cta:"Get the appointment worksheet by email.",shots:"",proof:""},
+
+/* ---------------- WEEK 2 ---------------- */
+{week:2,day:"MON",kind:"Founder film · 100s",title:"How I became five different patients",goal:"Founder / trust",levity:false,
+hook:"Within a few months I was gaining weight I couldn't explain, waking at 3am every night, crashing by 11, losing my hair — and getting sent to five different specialists. Not one looked at all of it together.",
+script:"Okay, Part two. So — when I finally stopped, that's kind of when my body got loud.\n\nAnd I mean within a few months — I was gaining weight I genuinely could not explain. Waking up at 3am, like, every single night. Crashing by 11 in the morning. My hair was coming out in the sink.\n\nFor years, there was always an explanation, right? Tired? You run a company. Not sleeping? You run a company. And then the company was gone, and the explanation just changed shape — you're in shock, you're burnt out, that's normal.\n\nAnd that's the problem with explanations. Sometimes they make so much sense that you just… stop asking questions.\n\nBut every symptom got its own little box. My cycle — gynaecologist. My weight and hormones — endocrinologist. My skin — dermatologist. My mood — a psychologist. The exhaustion — my GP. And each of them looked carefully at their own piece. Which, I get it — that's how medicine is set up.\n\nBut I remember sitting there thinking… hang on. How did I turn into five different patients? I'm one woman. One body. And all of this is happening at the same time. So — who was actually looking at all of it together?",
+visual:"Founder A-roll; simple graphic of separated appointment cards converging. No staged hospital imagery.",cta:"Reply to Stories: what do you always forget to mention? Founding Circle in bio.",shots:"Seated 2 takes; insert appointment-card graphic.",proof:"Personal symptoms — confirm wording against her records."},
+
+{week:2,day:"TUE",kind:"Evidence reel · 40s",title:"'My bloods were fine.'",goal:"Clinical literacy / saves",levity:false,
+hook:"A normal full blood count does not answer every question about iron.",
+script:"A normal full blood count does not answer every question about iron.\n\nA full blood count looks at blood cells. Ferritin helps assess iron stores, in the right clinical context. And iron deficiency can exist without anaemia.\n\nSo if you have persistent fatigue or heavy menstrual bleeding, don't invent an 'optimal' ferritin number from social media.\n\nAsk a clearer question: 'Was iron status assessed, including ferritin — or was this mainly a full blood count?'\n\nThat's not arguing with the result. It's understanding what the test actually assessed.",
+visual:"Split FBC vs ferritin; source footer; no magic-number graphic.",cta:"Save the question. Get the worksheet by email.",shots:"",proof:"CLINICIAN REVIEW before publishing. Cite primary iron-deficiency guidance; no 'optimal ferritin' number."},
+
+{week:2,day:"WED",kind:"Product reel · 40s",title:"Watch a First Read happen",goal:"Conversion / demo",levity:false,
+hook:"I don't want to describe it. Watch the result appear.",
+script:"I don't want to describe The Body Tell anymore. Watch what happens.\n\nYou answer questions about the changes you've noticed. Those answers are considered together.\n\nHere's the primary pattern that appears in this example. It's not a diagnosis — it's a structured way to see which observations may belong in one conversation.\n\nThe full Pattern Report adds context and a clinician brief.\n\nScattered information in. A clearer starting conversation out.\n\nYour First Read is free.",
+visual:"Actual product walkthrough; blur names and health data.",cta:"Start the free First Read. Optional separate Founding Circle checkbox.",shots:"Screen-record a sample case; VO; capture CTA landing page.",proof:"Only show features that exist in the live build."},
+
+{week:2,day:"THU AM",kind:"Carousel · 7 slides",title:"'Normal.' What next?",goal:"Saves / authority",levity:false,
+hook:"Your results are normal. You still feel unwell. Here's how to continue.",script:"",
+slides:["YOUR RESULTS ARE NORMAL. | You still feel unwell.","'What did these tests assess — and what didn't they assess?'","'Given my symptoms, what else would you consider?'","'Could timing matter for any of these results?'","'What changes should I monitor?'","'When should we review if symptoms continue?'","NORMAL IS A RESULT, NOT ALWAYS THE END OF A PLAN. | Free worksheet → bio."],
+visual:"Understated lab-style cards; bone + gold annotation.",cta:"Save. Download the questions via the Founding Circle.",shots:"",proof:"Keep framing 'labs are one source' — never anti-lab, never anti-doctor."},
+
+{week:2,day:"THU PM",kind:"Short reel · 30s",title:"When you start editing yourself",goal:"Recognition / shares",levity:false,
+hook:"After enough 'everything looks fine,' some women stop telling the whole story.",
+script:"After enough 'everything looks fine,' some women stop telling the whole story.\n\nYou shorten it. Leave out a symptom. Say 'probably stress' before anyone asks.\n\nBut every detail you remove makes the timeline harder to see.\n\nYou don't need to perform your suffering. Keep the information intact — what changed, when, what appears together, what it stops you doing.\n\nYou deserve to bring the full story, without turning it into a diagnosis.",
+visual:"Founder close-up; edit cuts tighten as 'the story shrinks'.",cta:"Share with someone who needs permission to say the whole thing.",shots:"",proof:""},
+
+{week:2,day:"FRI",kind:"Explainer reel · 35s",title:"Google is not your clinician",goal:"Trust / differentiation",levity:false,
+hook:"Six symptoms in a search box can produce fifty frightening possibilities.",
+script:"Six symptoms in a search box can produce fifty frightening possibilities.\n\nBecause symptoms overlap — and context, history, examination and testing change the interpretation.\n\nThat's why The Body Tell doesn't hand you a diagnosis from a symptom list. It helps you organise what changed, when, and what may belong together.\n\nThen you take that to a qualified clinician.\n\nWe're the preparation. The care is theirs.",
+visual:"Search bar dissolves into a structured timeline; no fabricated search results.",cta:"Follow. Free First Read in bio.",shots:"",proof:""},
+
+{week:2,day:"SAT",kind:"The Default Body reel · 40s",title:"'Redness.' Red on whom?",goal:"Differentiation / shares",levity:false,
+hook:"If guidance tells you to look for redness, the next question is: red on whom?",
+script:"If health guidance tells you to look for 'redness,' here's a question: red on whom?\n\nSome visual signs appear differently across skin tones — and clinical education hasn't always illustrated that well.\n\nThat matters, because a description written for one appearance can be less useful for another.\n\nIt doesn't mean people have different basic biology because of skin colour. It means the way we recognise and describe visible changes needs to be more precise.\n\nThat question — who was the default? — is one I've been asking since 4.5.6 Skin.",
+visual:"Founder + licensed, clinically accurate paired reference images. No unverified side-by-sides.",cta:"Share. Join the Founding Circle for evidence-led updates.",shots:"",proof:"CLINICIAN + dermatology-of-colour source review. Do not claim a phototype-weighted algorithm unless it exists."},
+
+{week:2,day:"SUN",kind:"Carousel · 6 slides",title:"What TBT does / doesn't",goal:"Trust / conversion",levity:false,
+hook:"What this tool can responsibly do — and where it stops.",script:"",
+slides:["WHAT THE BODY TELL DOES / DOESN'T","DOES | Organises symptoms, timing and context.","DOES | Finds patterns in your answers; prepares discussion questions.","DOESN'T | Diagnose, prescribe, or replace medical examination.","THE LINE | Pattern → direction. Clinician → clinical assessment.","TRY THE FREE FIRST READ | Join the Founding Circle for the free worksheet."],
+visual:"Bold two-column DOES / DOESN'T typography; bone + forest.",cta:"Free First Read + separate cohort signup.",shots:"",proof:""},
+
+/* ---------------- WEEK 3 ---------------- */
+{week:3,day:"MON",kind:"Founder film · 90s",title:"Being told you're fine makes you quieter",goal:"Trust / founder",levity:false,
+hook:"Every good doctor told me the same thing — you're tired, it'll pass, you're fine. And I wasn't. And being told you're fine, enough times, doesn't make you feel better. It just makes you quieter.",
+script:"Part three. So — when something breaks, your first instinct is to put it back together, right? I went looking for a buyer. I hoped again. And none of it worked.\n\nSo the company's gone, and I turn to my body. And I saw good doctors — genuinely good ones. And every single one gave me a version of the same sentence: you're tired, it'll pass, you're fine. And I wasn't.\n\nAnd honestly, at some point I started wondering if I was just making it up. Because when you keep hearing 'it's in your head' — you start editing yourself. You leave things out, because said all at once they sound dramatic.\n\nAnd here's the thing I really want you to hear: being told you're fine, enough times — it doesn't make you feel better. It just makes you quieter.\n\nEventually, further conversations and investigation helped me understand more of what was happening — it took time, and clinical care, and follow-up. But I kept thinking: why is it so hard to just bring a useful starting history into the room? And what about a woman juggling work, kids, caring for everyone else? That preparation problem — that's what The Body Tell is my answer to. Not a substitute for the care that follows.",
+visual:"Founder uninterrupted open; overlays 'I left that out' / 'I minimised that'. Soft light, no dramatic music.",cta:"What part of your health story is hardest to explain?",shots:"One seated take.",proof:"Keep 'clinical care + follow-up' language; non-diagnostic."},
+
+{week:3,day:"TUE",kind:"Pattern reel · 35s",title:"Heavy periods + fatigue",goal:"Recognition / shares",levity:false,
+hook:"Heavy bleeding and new breathlessness shouldn't be filed as unrelated without discussion.",
+script:"Heavy menstrual bleeding is one piece of information. Persistent fatigue is another. New breathlessness on exertion is another.\n\nTogether, they can raise questions about blood loss and iron status — among other possibilities.\n\nThat doesn't prove iron deficiency. It means the bleeding belongs in the fatigue conversation.\n\nTry: 'My periods became much heavier, and I've developed fatigue and breathlessness. Could they be connected, and what should we assess?'\n\nNew or significant breathlessness deserves prompt medical attention. Connect — don't diagnose.",
+visual:"Three symptom cards join into one question card.",cta:"Save the exact sentence.",shots:"",proof:"CLINICIAN REVIEW. On-screen + caption safety note for breathlessness."},
+
+{week:3,day:"WED",kind:"Pattern reel · 35s",title:"Acne + coarse hair + irregular cycles",goal:"Discovery / literacy",levity:false,
+hook:"Three changes you may have been managing separately can belong in one conversation.",
+script:"Acne alone doesn't diagnose anything. Irregular cycles alone don't. New or increasing coarse facial hair alone doesn't.\n\nBut when androgen-related skin or hair changes appear with cycle irregularity, clinicians may consider conditions including PCOS — depending on the full picture.\n\nNotice what I didn't say: 'you have PCOS.' I said: these changes are worth discussing together.\n\nBring the timeline, not a self-diagnosis.",
+visual:"Skin / hair / calendar editorial collage; no invasive close-ups.",cta:"Send to someone managing each symptom separately.",shots:"",proof:"CLINICIAN REVIEW against the 2023 international PCOS guideline; verify wording."},
+
+{week:3,day:"THU AM",kind:"Carousel · 7 slides",title:"Same symptom. Different context.",goal:"Saves / teaching",levity:false,
+hook:"Fatigue isn't one clinical question.",script:"",
+slides:["FATIGUE ISN'T ONE QUESTION.","FATIGUE + HEAVY BLEEDING | Ask whether blood loss / iron status matters.","FATIGUE + COLD INTOLERANCE + BOWEL CHANGES | Thyroid is one possible topic to assess.","FATIGUE + MEAL-RELATED SYMPTOMS | Describe timing and symptoms precisely.","FATIGUE + NEW CYCLE / SLEEP CHANGES | Reproductive stage and sleep may be relevant.","NONE OF THESE = A DIAGNOSIS. | Context changes the question.","BRING THE WHOLE CLUSTER. | Free worksheet → Founding Circle."],
+visual:"Editorial cards; one repeated FATIGUE header.",cta:"Save / share / join the cohort.",shots:"",proof:"CLINICIAN REVIEW of each cluster framing."},
+
+{week:3,day:"THU PM",kind:"Short reel · 30s",title:"Brain fog: ask when",goal:"Clinical translation",levity:false,
+hook:"Brain fog is broad. The timing is often more useful than the label.",
+script:"Brain fog is one of the broadest symptoms people search online.\n\nSo instead of 'which hormone causes brain fog?', start here. When did it begin? Is it constant? Does it follow poor sleep? Does it vary across your cycle? Did anything else change?\n\nThe symptom is the headline. The timeline is the story. That's what to bring into the appointment.",
+visual:"Minimal clock / cycle / sleep overlays.",cta:"Save this checklist.",shots:"",proof:""},
+
+{week:3,day:"FRI",kind:"Evidence reel · 40s",title:"Too young for perimenopause?",goal:"Literacy / authority",levity:false,
+hook:"Age matters. But a birthday alone doesn't explain away changing cycles and symptoms.",
+script:"Age matters when evaluating the menopausal transition. But a birthday alone shouldn't end the conversation about new cycle changes, sleep disruption or hot flushes.\n\nThe assessment is different at 38, 43 and 48 — that's exactly why context matters.\n\nInstead of 'am I too young?', ask: 'My cycle and symptoms have changed. Could reproductive stage be relevant, and what assessment makes sense at my age?'\n\nA good question invites clinical judgment. It doesn't demand a diagnosis.",
+visual:"Age numbers 38 / 43 / 48; source strip.",cta:"Save the sentence. Join the cohort for next week's appointment tools.",shots:"",proof:"CLINICIAN REVIEW against age-specific NICE NG23 / STRAW+10; no blanket FSH advice."},
+
+{week:3,day:"SAT",kind:"The Default Body reel · 35s",title:"The problem with 'look pale'",goal:"Method / differentiation",levity:false,
+hook:"A visual symptom description can fail when it assumes one skin appearance.",
+script:"'Look for pallor' sounds simple. But visible signs aren't always equally easy to recognise across skin tones — pallor and some other signs are often read in the gums, the inner eyelids or the nail beds, not the face.\n\nThat's why clinical descriptions need context, not just a colour word. What changed for you? What else is present? What can a clinician examine or test?\n\nNo one should have to diagnose themselves by comparing their face to a textbook photo. Better recognition starts by asking who the textbook was designed to represent.",
+visual:"Founder + evidence citation; no staged 'pale face' comparison.",cta:"Share. Follow the Default Body series.",shots:"",proof:"CLINICIAN + dermatology-of-colour source required."},
+
+{week:3,day:"SUN",kind:"Carousel · 9 slides",title:"The pattern worksheet",goal:"Email capture / saves",levity:false,
+hook:"Turn a scattered health story into one page.",script:"",
+slides:["THE PATTERN WORKSHEET | Screenshot this, or get the printable.","1 | What changed?","2 | When did it start?","3 | What else changed around then?","4 | What appears together?","5 | What makes it better or worse?","6 | What can you no longer do easily?","7 | What have you tried, tested or tracked?","8 | What do you want answered? · Get the printable via the Founding Circle."],
+visual:"Printable paper aesthetic; the real downloadable PDF must exist first.",cta:"Founding Circle signup → worksheet delivery.",shots:"",proof:"Only offer the worksheet once it exists and delivery is tested."},
+
+/* ---------------- WEEK 4 ---------------- */
+{week:4,day:"MON",kind:"Founder film · 110s",title:"So I built the tool I wish I'd had",goal:"Conversion / culmination",levity:false,
+hook:"It turned out it wasn't 'just burnout' — burnout was the headline, my body had the rest of the story. And once I had answers, one question wouldn't leave me alone: why does getting to the starting point take women years?",
+script:"Okay — last part. So, after all those rounds of tests, here's what was going on, for me: it wasn't 'just burnout.' Burnout was kind of the headline — but my body had the whole rest of the story.\n\nAnd I'll be honest — at first I didn't even find the strength for myself. It was my kids. They needed their mum. That's what kept me asking. It took me way longer to understand I had to get better for me. For me, first.\n\nAnd once I started getting answers, one question would not leave me alone: how do women do this? Because — yeah, I needed the doctor. The bloodwork, the tests, the treatment. You can't skip those. But before any of that could even help me, I needed a useful starting point. And I kept thinking — why is getting to that starting point so hard?\n\nAnd that felt really familiar. Because it was the same question I spent years on at 4.5.6: what happens to a woman when she was never the default? Back then, it was her skin. This time — it was one layer down. Her hormonal health.\n\nSo I built the tool I really wish I'd had. It's called The Body Tell. It's a reading across the things that usually get split up — cycle, sleep, energy, skin, mood, metabolism — and the context around what's been going on. It takes your skin phototype into account, because some signs show up differently on deeper skin. And it does the one thing I needed — it looks at all of it together.\n\nTo be clear: it does not diagnose you. It gives you a useful starting point, so you can have a better conversation about what comes next. Your first reading is free. If several things have changed and you don't know how to connect them — start there.",
+visual:"Founder A-roll + genuine product reveal at ~75%.",cta:"Start the free First Read. Separately, join the Founding Circle.",shots:"Founder 2 takes; capture the real First Read result + brief.",proof:"Confirm report fields + that first reading is genuinely free in the live build."},
+
+{week:4,day:"TUE",kind:"Clinical reel · 30s",title:"Normal is a result, not a plan",goal:"Saves / literacy",levity:false,
+hook:"'Okay, that's normal. What does it rule out — and what happens next?'",
+script:"One of the most useful sentences in healthcare is: 'Okay, that's normal. What does that rule out — and what happens next?'\n\nA normal result can be reassuring. It also answers a particular question.\n\nIf symptoms persist, ask what was assessed, whether follow-up is needed, and which changes should prompt you to return.\n\nYou don't have to dispute the result to ask for a plan.",
+visual:"Bold sentence; Noelly talking head.",cta:"Save the sentence.",shots:"",proof:""},
+
+{week:4,day:"WED",kind:"Clinical reel · 30s",title:"'We'll monitor it' needs a plan",goal:"Saves / authority",levity:false,
+hook:"Monitoring is useful when you know what, when, and what would change the plan.",
+script:"If your clinician says 'let's monitor it,' ask three things.\n\nWhat exactly should I track? When should we review it? What change would make us investigate or act sooner?\n\nMonitoring isn't dismissal when there's a plan attached. Write it down before you leave.\n\nThat's self-advocacy without turning the appointment into a fight.",
+visual:"Three numbered overlays; direct camera.",cta:"Save, or get the worksheet by email.",shots:"",proof:""},
+
+{week:4,day:"THU AM",kind:"Carousel · 8 slides",title:"Seven sentences worth saving",goal:"Saves / shares",levity:false,
+hook:"You don't need to sound medical. You need to be specific.",script:"",
+slides:["7 SENTENCES TO TAKE TO YOUR NEXT APPOINTMENT","'These changes began around the same time.'","'This is new for me.'","'This happens about ___ times a week.'","'This is what it's stopping me from doing.'","'What does this result rule out?'","'What should I monitor, and when should we review?'","YOU DON'T NEED A DIAGNOSIS TO ASK A CLEAR QUESTION. | Printable → Founding Circle."],
+visual:"Forest / bone typographic quote cards.",cta:"Download the worksheet; share the carousel.",shots:"",proof:""},
+
+{week:4,day:"THU PM",kind:"Short reel · 25s",title:"The appointment is ending",goal:"Shares / utility",levity:false,
+hook:"Your clinician is wrapping up. You still haven't asked your main question. Say this.",
+script:"Your clinician is wrapping up. You still haven't asked your main question. Say this.\n\n'Before we finish, there's one thing I don't want to leave without addressing.'\n\nThen ask it.\n\nIf there isn't time: 'Should I book a separate appointment for this?'\n\nYou don't need to squeeze six months of symptoms into the final thirty seconds. Protect the question — and get a plan for when to address it.",
+visual:"Tight crop; quote text fills frame.",cta:"Share with an appointment buddy.",shots:"",proof:""},
+
+{week:4,day:"FRI",kind:"Product reel · 40s",title:"From answers to clinician brief",goal:"Conversion / proof",levity:false,
+hook:"This is the page I wish I could have handed each new clinician.",
+script:"This is the page I wish I could have handed each new clinician, instead of starting my story from scratch.\n\nIt's the clinician brief from The Body Tell. It brings together the pattern context, the key observations and questions to discuss, using information from the reading.\n\nIt doesn't tell the clinician what diagnosis to make. It gives them a clearer starting history to review with you.\n\nYour free First Read comes first. The full Pattern Report and the brief are the optional next step.\n\nStart with the free reading in the bio.",
+visual:"Real clinician brief, sections highlighted in sync with VO.",cta:"Start the free First Read; optional upgrade.",shots:"Screen capture; no invented result screens; cover identifying details.",proof:"Check exact report + brief fields before filming."},
+
+{week:4,day:"SAT",kind:"Trust reel · 35s",title:"Why we don't diagnose",goal:"Trust / objection handling",levity:false,
+hook:"Certainty sells. That doesn't make it responsible.",
+script:"Certainty sells.\n\n'This is your hormone problem.' 'This number explains everything.' 'You definitely have this.'\n\nIt can sound satisfying. But symptoms overlap, and clinical assessment needs context, examination and sometimes testing.\n\nSo The Body Tell draws a line. Pattern: yes. Useful direction for discussion: yes. Diagnosis from a reading: no.\n\nRespecting that boundary doesn't make the tool weaker. It makes its purpose clearer.",
+visual:"Founder direct; stark forest / bone typography.",cta:"Follow. Free First Read in bio.",shots:"",proof:""},
+
+{week:4,day:"SUN",kind:"Carousel · 8 slides",title:"Six things to remember",goal:"Retention / conversion",levity:false,
+hook:"If you remember six things from this month, remember these.",script:"",
+slides:["AFTER 30 DAYS, REMEMBER THESE SIX THINGS.","1 | One symptom rarely tells the whole story.","2 | What happens together may change the clinical question.","3 | A pattern gives direction, not diagnosis.","4 | A normal result answers a specific question.","5 | You can advocate without becoming your own doctor.","6 | Your history should travel with you between appointments.","UNDERSTAND · CONNECT · ACT | Free First Read + Founding Circle → bio."],
+visual:"Six-part editorial manifesto; gold linework.",cta:"Share. Free First Read. Founding Circle.",shots:"",proof:""}
+],
+stories:{
+"1":[["MON","Why this exists","Face camera: 'I nearly didn't share today's founder film. But if I'm asking women to tell the whole story, I have to do that too.' — Poll: 'Several health changes at once?' YES / NO — Share the founder film."],
+["TUE","Audience language","Face camera + Question sticker: 'What's the symptom you always lead with?' — Share the reel — 'Free worksheet is coming to the Founding Circle — join via bio.'"],
+["WED","Clarify pattern","You to camera + Quiz: 'A pattern is… a diagnosis / a direction for questions.' — Answer card — Link to Founding Circle."],
+["THU","Timeline day","You holding a blank four-month timeline — Poll: 'Would you use this before an appointment?' — Link to worksheet signup."],
+["FRI","Real product","You + 3 real screens (intake, primary result, brief) — Link sticker to the free First Read — Separate link to Founding Circle."],
+["SAT","Research","You to camera + Question box: 'Which symptom gets all the attention while others get ignored?' — Share ONE anonymised theme; never share identifiable stories."],
+["SUN","Recap","Face camera: 'This week — context matters. Next week — what the tool actually gives you.' — Worksheet link — Founder Part 2 teaser."]],
+"2":[["MON","Whole woman","Share the founder film + you to camera — Poll: 'Ever forgotten something important at an appointment?' — Founding Circle link."],
+["TUE","Blood tests","You to camera: 'FBC isn't the same as ferritin.' — Ask: 'Do you know which tests were ordered?' — Share the reel with the source footer."],
+["WED","Demo","You + 3-step screen capture: answer → free primary pattern → optional full report — Link sticker: First Read — Consent note: emails only with opt-in."],
+["THU","Normal results","Face camera + Question box: 'What do you wish you'd asked after a normal result?' — Share the carousel — Worksheet link."],
+["FRI","What TBT is not","Face camera: 'I'm not building an online diagnosis machine.' — Share the reel — Poll: 'Would you bring a clinician brief?'"],
+["SAT","Default body","You to camera + Ask: 'Have you seen clinical imagery that didn't resemble your skin?' — Share the Default Body reel — Evidence source card."],
+["SUN","Trust","Share the DOES / DOESN'T carousel + you to camera — Founding Circle link — Next-week teaser: real pattern examples."]],
+"3":[["MON","Editing yourself","Share the founder film + you to camera — Poll: 'Ever minimised a symptom?' — Worksheet link."],
+["TUE","Iron cluster","You to camera + the exact clinician sentence — Urgent-symptom safety note — Free worksheet link."],
+["WED","PCOS nuance","You to camera + Quiz: 'Three symptoms = a diagnosis?' NO — Source card — Share the reel."],
+["THU","Context","You to camera + Story game: FATIGUE + ? (question box) — Repost anonymised themes without interpreting anyone's symptoms — Carousel link."],
+["FRI","Life stage","You to camera + Poll: 'Have your cycles changed in the last year?' — Source card — Share the reel."],
+["SAT","Skin tone","Face camera: 'Clinical visual descriptions aren't always universal.' — Share the Default Body reel — Ask for experiences, not diagnoses."],
+["SUN","Worksheet launch","You showing the printable worksheet — Link sticker to email signup — Founder Part 4 teaser."]],
+"4":[["MON","Founder finale","Face camera: 'Here's what I built in response.' — Share the founder film — First Read link + separate Founding Circle link."],
+["TUE","Normal ≠ plan","You to camera + the exact question as a story template — Ask: 'What would you ask next?' — Worksheet link."],
+["WED","Monitoring","You + 3-frame What / When / Trigger — Poll: 'Did you leave with a follow-up date?' — Share the reel."],
+["THU","Appointment phrases","You to camera + tap-through quote cards — Carousel link — Worksheet signup."],
+["FRI","Brief demo","You + real clinician brief zoom — First Read link — Explain the paid report only after the free result."],
+["SAT","Trust boundary","You to camera + 'Pattern ≠ diagnosis' quiz — Share the reel — Answer a common objection from the question box."],
+["SUN","Cohort close","Face camera: month recap — Ask: 'What should we cover next month?' — Founding Circle join + First Read link — Thank the community."]]
+},
+emails:[
+["Email 0 · immediately","Here's your worksheet","Subject: Your appointment worksheet is here. Deliver the resource first; show how to use it in five minutes; softly introduce the Founding Circle."],
+["Email 1 · +2 days","One symptom isn't the story","Subject: What changed at the same time? Teach one worked, non-diagnostic pattern. CTA: fill out the worksheet."],
+["Email 2 · +4 days","Why I built this","Subject: I became five different patients. Founder story; CTA: reply with the hardest part of preparing for appointments (no sensitive health details requested)."],
+["Email 3 · +7 days","See the product","Subject: What a First Read actually gives you. Show genuine screenshots; CTA: start the free First Read."],
+["Email 4 · +10 days","The next conversation","Subject: Seven sentences to take to your appointment. Practical utility; CTA: First Read, or share the worksheet."],
+["Ongoing · weekly","Founding Circle letter","One researched insight, one useful sentence, one product lesson. Not a generic hormone newsletter. Ask permission before repurposing any member feedback."]
+]
+};
+const tabs=[["overview","Overview"],["cohort","Cohort & email"],["production","Film & design"],["week1","Week 01"],["week2","Week 02"],["week3","Week 03"],["week4","Week 04"],["month2","Month 02"]];
+const $=s=>document.querySelector(s);
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+$("#tabs").innerHTML=tabs.map(([id,t])=>`<button data-tab="${id}" onclick="showTab('${id}')">${t}</button>`).join("");
+$("#weekCards").innerHTML=[["01","Recognition","Why symptoms belong together"],["02","Understanding","What the product does / doesn't"],["03","Proof","Worked patterns + the Default Body"],["04","Action","Better conversations + free First Read"]].map(([n,t,d])=>`<div class="weekcard"><div class="n">${n}</div><h3>${t}</h3><p>${d}</p><button class="btn secondary" onclick="showTab('week${Number(n)}')">Open week →</button></div>`).join("");
+$("#emailArc").innerHTML=DATA.emails.map(([b,h,p])=>`<div><span class="badge">${esc(b)}</span><h3 style="margin:8px 0 4px">${esc(h)}</h3><p style="font-size:13px">${esc(p)}</p></div>`).join("");
+const weekTitles=["","Your symptoms are data","The tool I wish I'd had","When symptoms connect","From information to action"];
+const weekGoals={1:"Recognition · establish the pattern concept; capture founding emails with a useful worksheet.",2:"Understanding · demonstrate the First Read and set the line between pattern and diagnosis.",3:"Proof · worked clinical examples, evidence literacy, and skin-tone-aware communication.",4:"Action · founder reveal, clinician language, product proof, qualified First Read starts."};
+for(let w=1;w<=4;w++){
+  const s=document.createElement("section");s.className="section";s.id="week"+w;
+  s.innerHTML=`<div class="weekhead"><div class="eyebrow">Production week ${String(w).padStart(2,"0")}</div><h2>${weekTitles[w]}</h2><p>${weekGoals[w]}</p><button class="btn secondary" onclick="expandAll(${w})">Expand / collapse all</button></div>
+  <div class="two"><div class="panel"><h3>Film this week</h3><div id="film${w}"></div></div><div class="panel"><h3>Design / prepare</h3><div id="design${w}"></div></div></div>
+  <h2 style="margin-top:34px">Feed assets · full scripts and slides</h2><div id="posts${w}"></div>
+  <h2 style="margin-top:38px">Daily Stories · every one shows you or a real woman, to camera</h2><div id="stories${w}"></div>`;
+  $("#weeks").appendChild(s);
+  const ps=DATA.posts.filter(p=>p.week===w);
+  $("#film"+w).innerHTML=ps.filter(p=>/reel|film/i.test(p.kind)).map(p=>`<p><span class="badge">${esc(p.day)}</span> ${esc(p.title)} <small class="muted">· ${esc(p.kind)}</small></p>`).join("");
+  $("#design"+w).innerHTML=ps.filter(p=>/carousel/i.test(p.kind)).map(p=>`<p><span class="badge">${esc(p.day)}</span> ${esc(p.title)} <small class="muted">· ${p.slides?p.slides.length:0} slides</small></p>`).join("")+`<p class="muted">Plus: 7 Story cards, reel covers, source footers, lead-magnet link checks.</p>`;
+  $("#posts"+w).innerHTML=ps.map((p,i)=>`<article class="post"><div class="posthead" onclick="this.parentNode.classList.toggle('open')"><div class="day">${esc(p.day)}</div><div class="postname"><h3>${esc(p.title)}${p.levity?' <span class="badge" style="background:color-mix(in srgb,var(--terra) 14%,transparent);color:var(--terra)">dry levity</span>':''}</h3><small>${esc(p.kind)} · ${esc(p.goal)}</small></div><span class="expand">＋</span></div><div class="postbody"><div class="label">Opening hook / cover</div><div class="hook">${esc(p.hook)}</div>${p.script?`<div class="label">Full spoken script · teleprompter-ready</div><div class="script">${esc(p.script)}</div><button class="btn secondary" onclick="copyScript(${w},${i})">Copy script</button>`:""}${p.slides&&p.slides.length?`<div class="label">Full carousel slide copy</div><div class="slides">${p.slides.map((x,j)=>`<div class="slide"><b>SLIDE ${String(j+1).padStart(2,"0")}</b><span>${esc(x)}</span></div>`).join("")}</div>`:""}<div class="label">Visual / format</div><div class="detail">${esc(p.visual)}</div>${p.shots?`<div class="label">Shot list / edit notes</div><div class="detail">${esc(p.shots)}</div>`:""}<div class="label">Conversion / CTA</div><div class="detail"><strong>${esc(p.cta)}</strong></div>${p.proof?`<div class="label">Red-team check before publishing</div><div class="callout">${esc(p.proof)}</div>`:""}<div class="actions"><label><input type="checkbox" data-key="ready-${w}-${i}"> Filmed / designed</label><label><input type="checkbox" data-key="rev-${w}-${i}"> Reviewed</label><label><input type="checkbox" data-key="pub-${w}-${i}"> Published</label></div></div></article>`).join("");
+  $("#stories"+w).innerHTML=DATA.stories[String(w)].map(([d,t,copy])=>`<div class="story"><strong>${esc(d)} · ${esc(t)}</strong><p>${esc(copy)}</p><span class="cam">visual: you or a real woman, to camera</span></div>`).join("");
+}
+const master=["Finalise the Founding Circle signup page + consent language","Create and test the one-page worksheet delivery","Verify a separate newsletter opt-in from the First Read account flow","Film all four founder films (your conversational scripts)","Film the short educational / discovery reels","Capture the product demos using test data only","Design the eight carousels","Build the 28 Story sequences + link stickers","Prepare the five welcome emails + tracking UTMs","Clinician + legal review of all medical claims and safety language"];
+const gates=["Consent log, unsubscribe and double opt-in tested","Worksheet arrives and opens on mobile","First Read CTA + tracking work from the Instagram in-app browser","Report + clinician-brief visuals match the live build","Clinician/source review done: ferritin, PCOS, perimenopause, skin tone","No fabricated testimonial, unverified outcome, or algorithm claim","Audio, captions, safe zones, mobile contrast reviewed","Urgent-symptom caveats included where needed","Palette checked: bone/gold/forest/terracotta — no coral/blush"];
+function checks(arr,id){$("#"+id).innerHTML=arr.map((x,i)=>`<label><input type="checkbox" data-key="${id}-${i}"> ${esc(x)}</label>`).join("");}
+checks(master,"mastercheck");checks(gates,"gates");
+function showTab(id){document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));window.scrollTo({top:$(".nav").offsetTop,behavior:"smooth"});}
+function expandAll(w){const ps=[...document.querySelectorAll("#posts"+w+" .post")];const opening=ps.some(x=>!x.classList.contains("open"));ps.forEach(x=>x.classList.toggle("open",opening));}
+function copyScript(w,i){const p=DATA.posts.filter(x=>x.week===w)[i];const t=p.script||(p.slides?p.slides.join("\n\n"):"");navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>alert("Copied to clipboard"));}
+document.addEventListener("change",e=>{if(e.target.matches("input[data-key]"))localStorage.setItem("tbt-"+e.target.dataset.key,e.target.checked?"1":"0");});
+document.querySelectorAll("input[data-key]").forEach(e=>e.checked=localStorage.getItem("tbt-"+e.dataset.key)==="1");
+showTab("overview");
+</script>
+
+</body></html>
